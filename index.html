@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>持ち帰りチェッカー</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="phone">
+    <!-- Home -->
+    <div class="screen active" id="home">
+      <div class="topbar">
+        <div class="topbar-left">
+          <h1>持ち帰りチェック</h1>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="subtle">今回の状況</div>
+        <div class="big-number" id="homeUncheckedCount">0件</div>
+        <div class="subtle">未対応のアイテム</div>
+
+        <div class="progress-wrap">
+          <div class="progress-head">
+            <span>進捗</span>
+            <strong id="homeProgressText">0%</strong>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="homeProgressFill"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <span>今回の状態</span>
+          <strong id="tripStatusDisplay">準備中</strong>
+        </div>
+        <div class="row">
+          <span>帰る予定</span>
+          <strong id="departureDisplay">未設定</strong>
+        </div>
+        <div class="row">
+          <span>次の通知目安</span>
+          <strong id="nextReminderDisplay">未設定</strong>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <span>リマインド対象</span>
+          <strong id="remindTargetCount">0件</strong>
+        </div>
+        <div class="row">
+          <span>使い切り予定アイテム</span>
+          <strong id="consumableCount">0件</strong>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>よく忘れるもの</h2>
+        <div id="forgottenItemsPreview" class="subtle">まだ記録はありません</div>
+      </div>
+
+      <div class="card">
+        <h2>今回の操作</h2>
+        <div id="tripActionArea"></div>
+      </div>
+
+      <button class="btn" onclick="showScreen('checklist')">チェックリストを確認</button>
+      <button class="btn secondary" onclick="openCreateItemScreen()">アイテムを追加</button>
+      <button class="btn ghost" onclick="showScreen('scheduleEdit')">帰る予定を設定</button>
+    </div>
+
+    <!-- Checklist -->
+    <div class="screen" id="checklist">
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn" onclick="showScreen('home')">←</button>
+          <h1>チェックリスト</h1>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="progress-head">
+          <span>チェック進捗</span>
+          <strong id="checklistProgressText">0 / 0</strong>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="checklistProgressFill"></div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <button class="section-toggle" onclick="toggleSection('pending')">
+          <span>未対応アイテム</span>
+          <span id="pendingCountBadge" class="section-count">0</span>
+          <span id="pendingToggleIcon" class="section-toggle-icon">−</span>
+        </button>
+        <div class="list" id="pendingItems"></div>
+      </div>
+
+      <div class="section-block">
+        <button class="section-toggle" onclick="toggleSection('completed')">
+          <span>チェック済みアイテム</span>
+          <span id="completedCountBadge" class="section-count">0</span>
+          <span id="completedToggleIcon" class="section-toggle-icon">＋</span>
+        </button>
+        <div class="list collapsed" id="completedItems"></div>
+      </div>
+
+      <div class="bottom-fixed">
+        <div id="checklistActionArea"></div>
+        <button class="btn secondary" onclick="openCreateItemScreen()">アイテムを追加</button>
+      </div>
+    </div>
+
+    <!-- Item Edit -->
+    <div class="screen" id="itemEdit">
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn" onclick="showScreen('home')">←</button>
+          <h1 id="itemEditTitle">アイテム追加</h1>
+        </div>
+      </div>
+
+      <label for="itemName">アイテム名</label>
+      <input id="itemName" type="text" placeholder="例：充電器" />
+
+      <label for="itemCategory">カテゴリ</label>
+      <select id="itemCategory">
+        <option value="必需品">必需品</option>
+        <option value="衣類">衣類</option>
+        <option value="美容・ケア">美容・ケア</option>
+        <option value="ガジェット">ガジェット</option>
+        <option value="お土産">お土産</option>
+        <option value="その他">その他</option>
+      </select>
+
+      <label for="itemQty">個数</label>
+      <div class="qty-row">
+        <button class="qty-btn" type="button" onclick="changeQty(-1)">−</button>
+        <input id="itemQty" class="qty-input" type="number" min="1" value="1" />
+        <button class="qty-btn" type="button" onclick="changeQty(1)">＋</button>
+      </div>
+
+      <div class="checkbox-row">
+        <input id="isConsumable" type="checkbox" />
+        <label for="isConsumable" class="inline-label">使い切り予定アイテム</label>
+      </div>
+
+      <div class="status-note">
+        使い切り予定アイテムは、チェックリストで「使い切った」を選べます。
+      </div>
+
+      <button class="btn" id="saveItemButton" onclick="saveItem()">保存する</button>
+      <button class="btn secondary" onclick="resetItemForm()">入力をリセット</button>
+      <button class="btn ghost hidden" id="deleteItemButton" onclick="deleteCurrentItem()">このアイテムを削除</button>
+    </div>
+
+    <!-- Schedule Edit -->
+    <div class="screen" id="scheduleEdit">
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn" onclick="showScreen('home')">←</button>
+          <h1>帰る予定を設定</h1>
+        </div>
+      </div>
+
+      <label for="departureAt">帰る日時</label>
+      <input id="departureAt" type="datetime-local" />
+
+      <label>通知タイミング</label>
+      <div class="checkbox-list">
+        <div class="checkbox-row">
+          <input type="checkbox" id="offset180" value="180" />
+          <label for="offset180" class="inline-label">3時間前</label>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="offset60" value="60" />
+          <label for="offset60" class="inline-label">1時間前</label>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="offset15" value="15" />
+          <label for="offset15" class="inline-label">15分前</label>
+        </div>
+      </div>
+
+      <p class="muted">
+        このフェーズでは、アプリを開いたときに通知タイミングを過ぎていて未対応のアイテムがあると、確認モーダルを表示します。
+      </p>
+
+      <button class="btn" onclick="saveSchedule()">保存する</button>
+      <button class="btn secondary" onclick="resetSchedule()">予定をリセット</button>
+    </div>
+
+    <!-- Reminder Modal -->
+    <div class="modal-bg" id="modal">
+      <div class="modal">
+        <h2 id="modalTitle">まだ確認が終わっていません</h2>
+        <p class="muted" id="modalDescription">未対応のアイテムがあります。</p>
+        <div class="info-line" id="modalReminderInfo"></div>
+        <ul class="modal-list" id="modalUncheckedList"></ul>
+        <button class="btn" onclick="closeReminderModal()">続けて確認する</button>
+        <button class="btn secondary" onclick="showScreen('home'); closeReminderModal();">ホームに戻る</button>
+      </div>
+    </div>
+
+    <!-- Completion Modal -->
+    <div class="modal-bg" id="completionModal">
+      <div class="modal">
+        <h2>おつかれさまです</h2>
+        <p class="muted">
+          持ち帰り準備が完了しました。帰るタイミングになったら「帰宅する」を押してください。
+        </p>
+        <button class="btn" onclick="startGoingHomeFromModal()">帰宅する</button>
+        <button class="btn secondary" onclick="closeCompletionModal()">あとで</button>
+      </div>
+    </div>
+
+    <!-- Arrival Modal -->
+    <div class="modal-bg" id="arrivalModal">
+      <div class="modal">
+        <h2>今回の持ち帰りが完了しました</h2>
+        <p class="muted">
+          到着時点の状態を記録しました。次回の忘れ物防止にも活用できます。
+        </p>
+        <button class="btn" onclick="closeArrivalModal()">確認しました</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
