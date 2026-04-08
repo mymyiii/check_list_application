@@ -415,6 +415,7 @@ function renderTripActionArea(containerId) {
     container.innerHTML = `
       <div class="action-note">今回の持ち帰りは完了しています。</div>
       ${latest ? `<div class="history-note">記録日時：${formatDateTime(latest.endedAt)}</div>` : ""}
+      <button class="btn" onclick="startNextTrip()">次の帰省を始める</button>
     `;
   }
 }
@@ -515,7 +516,7 @@ function renderChecklistActionArea() {
   }
 
   if (sessionState.tripStatus === TRIP_STATUS.ARRIVED) {
-    container.innerHTML = `<button class="btn" disabled>今回の持ち帰りは完了しています</button>`;
+    container.innerHTML = `<button class="btn" onclick="startNextTrip()">次の帰省を始める</button>`;
     return;
   }
 
