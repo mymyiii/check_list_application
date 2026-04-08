@@ -8,15 +8,19 @@ body {
   background: #f2f2f7;
   display: flex;
   justify-content: center;
+  align-items: center;
   padding: 24px 0;
   color: #111;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .phone {
   width: 390px;
   height: 844px;
+  max-height: calc(100vh - 48px);
   background: #fff;
-  border-radius: 24px;
+  border-radius: 36px;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   position: relative;
@@ -32,6 +36,37 @@ body {
 
 .screen.active {
   display: block;
+}
+
+/* スマホ実機や狭い幅では、モック枠を外して画面全体を使う */
+@media (max-width: 767px) {
+  body {
+    display: block;
+    height: auto;
+    min-height: 100dvh;
+    padding: 0;
+    overflow: auto;
+    background: #fff;
+  }
+
+  .phone {
+    width: 100%;
+    height: 100dvh;
+    max-height: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .screen {
+    height: 100dvh;
+    padding: 24px 20px 220px;
+  }
+
+  .bottom-fixed {
+    left: 20px;
+    right: 20px;
+    bottom: 16px;
+  }
 }
 
 .topbar {
