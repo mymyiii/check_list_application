@@ -763,6 +763,28 @@ function checkCompletionState() {
   renderAll();
 }
 
+function startNextTrip() {
+  items = items.map((item) => ({
+    ...item,
+    status: STATUS.PENDING
+  }));
+  saveItems();
+
+  schedule.sentReminders = {};
+  saveScheduleState();
+
+  sessionState.tripStatus = TRIP_STATUS.PREPARING;
+  sessionState.completionModalShown = false;
+  saveSessionState();
+
+  closeArrivalModal();
+  closeCompletionModal();
+  closeReminderModal();
+
+  renderAll();
+  showScreen("home");
+}
+
 function markPendingAsForgotten() {
   const pendingItems = getPendingItems();
   pendingItems.forEach((item) => {
